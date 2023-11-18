@@ -4,17 +4,28 @@ import {
   useLogin,
   useLogout,
   useMetamask,
+  useContract,
+  useNFTBalance,
+  ConnectWallet,
 } from "@thirdweb-dev/react";
 import type { NextPage } from "next";
 import { useState } from "react";
 
 const Home: NextPage = () => {
+  const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS
+
   const address = useAddress();
   const connect = useMetamask();
   const { login } = useLogin();
   const { logout } = useLogout();
   const { user, isLoggedIn } = useUser();
   const [secret, setSecret] = useState();
+  const { contract } = useContract(contractAddress)
+  const {
+      data: collectionBalance,
+      isLoading: isCollectionBalanceLoading,
+      error: isCollectionBalanceError,
+  } = useNFTBalance(contract, address)
 
   const getSecret = async () => {
     const res = await fetch("/api/secret");
@@ -24,6 +35,17 @@ const Home: NextPage = () => {
 
   return (
     <div>
+      <ConnectWallet switchToActiveChain={true} />
+      <p>address: {address}</p>
+      <p>balance: {collectionBalance?.toString()}</p>
+      <p>
+      isCollectionBalanceLoading:{' '}
+      {isCollectionBalanceLoading.toString()}
+      </p>
+      <p>
+      isCollectionBalanceError:{' '}
+      {isCollectionBalanceError?.toString()}
+      </p>
       {isLoggedIn ? (
         <button onClick={() => logout()}>Logout</button>
       ) : address ? (
